@@ -1,5 +1,6 @@
 import requests
 API_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzMzMxODk1ODg4Mjc5Y2E1MTYzZjhlZTMxYTU4NTA3NyIsInN1YiI6IjY2MzdhMGZkNDcwZWFkMDEyODEyZmEzMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.1awmg1b1O97PT9q77xyHIbKsLPP4yQcuxjIYi0Dlgl0"
+lists = ["popular", "top_rated", "upcoming", "now_playing"]
 
 def get_popular_movies():
     endpoint = "https://api.themoviedb.org/3/movie/popular"
@@ -14,7 +15,7 @@ def get_poster_url(poster_api_path, size="w342"):
     return f"{base_url}{size}/{poster_api_path}"
 
 def get_movies(how_many, list_type):
-    if list_type == "popular":
+    if list_type == "popular" or list_type not in lists:
         data = get_popular_movies()
     else:
         data = get_movies_list(list_type)
