@@ -1,28 +1,28 @@
+from main import app
 from unittest.mock import Mock
-from tmdb_client import call_tmdb_api, get_single_movie, get_poster_url, get_single_movie_cast
-import requests
+from tmdb_client import get_single_movie, get_poster_url, get_single_movie_cast
+import pytest
 
+@pytest.mark.parametrize("list_type, expected_api_call", (
+    ("popular", "movie/popular"),
+    ("top_rated", "movie/top_rated"),
+    ("now_playing", "movie/now_playing"),
+    ("upcoming", "movie/upcoming")
+))
 
 def mock_call_tmdb_api(monkeypatch):
     mock = Mock()
     monkeypatch.setattr('tmdb_client.call_tmdb_api', mock)
     return mock
 
-def test_call_tmdb_api(monkeypatch):
-    def mock_get(url, headers):
-        class MockResponse:
-            def raise_for_status(self):
-                pass
+def test_homepage(monkeypatch, list_type, expected_api_call):
+    api_mock = Mock(return_value={'results': []})
+    monkeypatch.setattr("tmdb_client.call_tmdb_api", api_mock)
 
-            def json(self):
-                return {"key": "value"}
-        return MockResponse()
-
-    monkeypatch.setattr(requests, "get", mock_get)
-
-    endpoint = "test_endpoint"
-    result = call_tmdb_api(endpoint)
-    assert result == {"key": "value"}
+    with app.test_client() as client:
+        response = client.get(f'/?list_type={list_type}')
+        assert response.status_code == 200
+        api_mock.assert_called_once_with(expected_api_call)
 
 def test_get_single_movie(monkeypatch):
     def mock_call_tmdb_api(endpoint):
